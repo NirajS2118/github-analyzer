@@ -3,28 +3,38 @@ import axios from "axios";
 
 axios.defaults.withCredentials = true;
 
+const API_URL = import.meta.env.VITE_API_URL || "";
+
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(undefined);
 
   useEffect(() => {
-    axios.get("/api/auth/me")
+    axios
+      .get(`${API_URL}/api/auth/me`)
       .then((res) => setUser(res.data.user))
       .catch(() => setUser(null));
   }, []);
 
   async function logout() {
-    await axios.post("/api/auth/logout");
+    await axios.post(`${API_URL}/api/auth/logout`);
     setUser(null);
   }
 
   function loginWithGitHub() {
-    window.location.href = "/api/auth/github";
+    window.location.href = `${API_URL}/api/auth/github`;
   }
 
   return (
-    <AuthContext.Provider value={{ user, logout, loginWithGitHub, loading: user === undefined }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        logout,
+        loginWithGitHub,
+        loading: user === undefined,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
