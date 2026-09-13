@@ -1,9 +1,9 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
 
-axios.defaults.withCredentials = true;
+const BASE = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
 
-const API_URL = import.meta.env.VITE_API_URL || "";
+axios.defaults.withCredentials = true;
 
 const AuthContext = createContext(null);
 
@@ -12,18 +12,33 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     axios
-      .get(`${API_URL}/api/auth/me`)
-      .then((res) => setUser(res.data.user))
-      .catch(() => setUser(null));
+      .get(`${BASE}/api/auth/me`, {
+        withCredentials: true,
+      })
+      .then((res) => {
+        setUser(res.data.user);
+      })
+      .catch(() => {
+        setUser(null);
+      });
   }, []);
 
   async function logout() {
-    await axios.post(`${API_URL}/api/auth/logout`);
-    setUser(null);
+    try {
+      await axios.post(
+        `${BASE}/api/auth/logout`,
+        {},
+        {
+          withCredentials: true,
+        }
+      );
+    } finally {
+      setUser(null);
+    }
   }
 
   function loginWithGitHub() {
-    window.location.href = `${API_URL}/api/auth/github`;
+    window.location.href = `${BASE}/api/auth/github`;
   }
 
   return (
